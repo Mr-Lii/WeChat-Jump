@@ -1,0 +1,140 @@
+C51 COMPILER V9.57.0.0   MAIN                                                              01/16/2018 16:16:31 PAGE 1   
+
+
+C51 COMPILER V9.57.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\Main.obj
+COMPILER INVOKED BY: E:\program files (x86)\Keil\C51\BIN\C51.EXE Main.c OPTIMIZE(8,SPEED) BROWSE INCDIR(.\Drive) DEBUG O
+                    -BJECTEXTEND PRINT(.\Listings\Main.lst) OBJECT(.\Objects\Main.obj)
+
+line level    source
+
+   1          #include <reg52.h>
+   2          #include <stdio.h>
+   3          #include <LCD12864.h>
+   4          #include <key.h>
+   5          #include <Interrupt.h>
+   6          
+   7          sbit pwm=P3^7;          //PWM信号输出口
+   8          
+   9          int Juli=0;     //int 范围是-32768—+32767
+  10          int Bai,Shi,Ge,AA,BB,CC;
+  11          int AnTim=0;    //按住时间
+  12                  
+  13          unsigned char count;            //0.5ms次数标识,可修改
+  14          unsigned char angle;            //角度标识
+  15          
+  16          
+  17          void main()
+  18          {
+  19   1              Time0_Init();
+  20   1              LCD12864_Init();        //LCD12864初始化
+  21   1              
+  22   1              angle=12;
+  23   1              count=0;
+  24   1              
+  25   1              LCD12864DisplayString(0,0,"跳一跳》物理辅助");
+  26   1              LCD12864DisplayString(1,0,"输入：");
+  27   1              LCD12864DisplayString(1,5,"mm");
+  28   1              LCD12864DisplayString(2,0,"范围：0-999");
+  29   1      //      LCD12864DisplayValue(2,0,val);  //显示距离
+  30   1              LCD12864DisplayString(3,0,"Master Li");
+  31   1              LCD12864DisplayPictrue(32,5,48,32,pictrue2);//显示机器猫
+  32   1      
+  33   1              while(1)
+  34   1              {
+  35   2      //              P0=sign[val];
+  36   2              key_scan();
+  37   2                      if(val<=9)
+  38   2                      {
+  39   3                              switch(ShuWei)
+  40   3                              {
+  41   4                                      case 1:
+  42   4                                              Bai=val;
+  43   4                                      break;
+  44   4                                      
+  45   4                                      case 2:
+  46   4                                              Shi=val;
+  47   4                                      break;
+  48   4                              
+  49   4                                      case 3:
+  50   4                                              Ge=val;
+  51   4                                      break;
+  52   4                              }
+  53   3      
+  54   3                              switch(ShuWei)
+C51 COMPILER V9.57.0.0   MAIN                                                              01/16/2018 16:16:31 PAGE 2   
+
+  55   3                              {
+  56   4                                      case 1:
+  57   4                                              Juli=Bai;
+  58   4                                      break;
+  59   4                              
+  60   4                                      case 2:
+  61   4                                              Juli=Bai*10+Shi;
+  62   4                                      break;
+  63   4                              
+  64   4                                      case 3:
+  65   4                                              Juli=Bai*100+Shi*10+Ge;
+  66   4                                              if(Juli>999) ShuWei=0;
+  67   4                                      break;
+  68   4                              }
+  69   3                      }
+  70   2                      
+  71   2                      if(ShuWei==0)
+  72   2                      {
+  73   3                              Juli=0;
+  74   3                      }
+  75   2      
+  76   2                      LCD12864DisplayValue(1,3,Juli); //显示距离
+  77   2      //              LCD12864DisplayValue(2,0,val);  //显示键值
+  78   2      
+  79   2                      AnTim=Juli*14;  //计算按住时间
+  80   2                      
+  81   2                      while(val==16)  //确定
+  82   2                      {
+  83   3      //                      key_scan();
+  84   3      //                      LCD12864DisplayValue(2,0,val);  //显示键值
+  85   3                                                      
+  86   3                              angle=10;       //按下
+  87   3                              count=0;        //按键按下 则20ms周期从新开始
+  88   3                              
+  89   3                              Delay_ms(AnTim);
+  90   3                              
+  91   3                              angle=11;       //抬起
+  92   3                              count=0;        //按键按下 则20ms周期从新开始
+  93   3                                      
+  94   3                              ShuWei=0;
+  95   3                              val=0;
+  96   3                      }
+  97   2      
+  98   2              }
+  99   1      }
+ 100          
+ 101          
+ 102          void Time0_Int() interrupt 1
+ 103          {
+ 104   1              TH0=0xff;
+ 105   1              TL0=0xa3;
+ 106   1              if(count<angle)         //判断0.5ms次数是否小于角度标识
+ 107   1                      pwm=1;          //确实小于，pwm输出高电平
+ 108   1              else
+ 109   1                      pwm=0;          //大于则输出低电平
+ 110   1                      count=(count+1);                //0.5ms次数加1
+ 111   1                      count=count%40;         //次数始终保持为40即保持周期为20ms
+ 112   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1414    ----
+C51 COMPILER V9.57.0.0   MAIN                                                              01/16/2018 16:16:31 PAGE 3   
+
+   CONSTANT SIZE    =    241    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     24      15
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
